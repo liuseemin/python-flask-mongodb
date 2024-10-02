@@ -6,6 +6,11 @@ name = "pypi"
 [packages]
 flask = "*"
 pymongo = "*"
+email-validator = "*"
+wtforms = "*"
+flask-wtf = "*"
+flask-bcrypt = "*"
+flask-pymongo = "*"
 
 [dev-packages]
 
