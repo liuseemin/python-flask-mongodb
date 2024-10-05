@@ -30,7 +30,8 @@ csp = {
     'style-src': [
         "'self'",
         'https://cdn.jsdelivr.net'
-    ]
+    ],
+    'img-src': "'self'"
 }
 talisman = Talisman(app, content_security_policy=csp)
 
