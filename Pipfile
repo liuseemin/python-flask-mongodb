@@ -11,6 +11,8 @@ wtforms = "*"
 flask-wtf = "*"
 flask-bcrypt = "*"
 flask-pymongo = "*"
+flask-login = "*"
+flask-talisman = "*"
 
 [dev-packages]
 
