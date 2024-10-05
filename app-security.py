@@ -138,5 +138,10 @@ def logout():
     flash('You have been logged out.', 'info')
     return redirect(url_for('login'))
 
+# layout test page
+@app.route('/test')
+def test():
+    return render_template('test.html')
+
 if __name__ == "__main__":
     app.run(debug=True)
