@@ -1,26 +1,32 @@
 {% extends 'base.html' %}
 {% block title %}Login{% endblock %}
 {% block content %}
-<div class="container ms-2">
-
-    <h1 class="my-4">Login</h1>
+<div class="container py-5 h-100">
+    <div class="row d-flex justify-content-center align-items-center h-100">
+        <div class="col col-xl-5 col-md-8 col-lg-6">
+            <div class="card rounded-3 bg-light">
+                <div class="card-body p-5">
+                    <h1 class="my-4">Login</h1>
     
-    <form method='POST' action="">
-        {{ form.hidden_tag() }}
-        <div class="mb-3">
-            {{ form.email.label(class="form-label") }} {{ form.email(class="form-control", placeholder="example@google.com") }}
+                    <form method='POST' action="">
+                        {{ form.hidden_tag() }}
+                        <div class="mb-3">
+                            {{ form.email.label(class="form-label") }} {{ form.email(class="form-control", placeholder="example@google.com") }}
+                        </div>
+                        <div class="mb-3">
+                            {{ form.password.label(class="form-label") }} {{ form.password(class="form-control") }}
+                        </div>
+                        <div class="mb-3">
+                            {{ form.submit(class="btn btn-primary") }}
+                        </div>
+            
+                        Don't have an account? <a href="{{ url_for('register') }}"> Register</a>
+            
+                    </form>
+                </div>
+            </div>
         </div>
-        <div class="mb-3">
-            {{ form.password.label(class="form-label") }} {{ form.password(class="form-control") }}
-        </div>
-        <div class="mb-3">
-            {{ form.submit(class="btn btn-primary") }}
-        </div>
-
-        <a href="{{ url_for('register') }}">Don't have an account? Register</a>
-
-    </form>
-
+    </div>
 </div>
 
 {% endblock %}
