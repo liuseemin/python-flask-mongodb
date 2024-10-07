@@ -13,6 +13,10 @@ from flask_wtf.csrf import CSRFProtect
 import uuid
 import email_validator
 
+# import patient structure
+from patient import Patient
+from patient_data import Problem, admission, gi_status
+
 from config import Config
 
 
@@ -45,7 +49,6 @@ db = mongo.db
 todos = db.todos
 users_collection = db.users
 patients_collection = db.patients
-patients_collection = db.patients
 
 # Login Manager setting
 login_manager = LoginManager()
@@ -62,7 +65,7 @@ class User(UserMixin):
         self.email = email
         self.verified = verified
         self.hashed_password = hashed_password
-        self.role = role
+        self.role = role if not role is None else 'user'
     
     @classmethod
     def make_from_dict(cls, dict):

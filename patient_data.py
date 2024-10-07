@@ -1,9 +1,9 @@
 from datetime import date
 
-# class: probme, gi_status, admission
+# class: problem, gi_status, admission
 
 # Problem class
-class problem():
+class Problem():
     def __init__(self, problem_id, title, description, active: bool, start: date, end: date, link) -> None:        
         self.problem_id = problem_id
         self.title = title

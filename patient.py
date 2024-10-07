@@ -1,8 +1,8 @@
-from patient_data import problem, gi_status
+from patient_data import Problem, gi_status
 from bson.objectid import ObjectId
-# patient class
 
-class patient():
+# patient class
+class Patient():
     def __init__(self, id, name, age: int, problems: list[ObjectId], OP_hx, GI_status: gi_status, lab: dict, notes, admission_hx) -> None:
         self.id = id
         self.name = name
