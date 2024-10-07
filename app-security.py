@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, request, redirect, flash, session
+from flask import Flask, jsonify, render_template, url_for, request, redirect, flash, session
 from flask_pymongo import PyMongo
 from flask_login import LoginManager, login_user, logout_user, login_required, UserMixin, current_user
 from flask_talisman import Talisman
@@ -6,13 +6,14 @@ from flask_talisman import Talisman
 from bson.objectid import ObjectId
 from flask_bcrypt import Bcrypt
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField
+from wtforms import BooleanField, DateField, FieldList, FormField, StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Length, EqualTo, Email, ValidationError
 from pymongo.errors import DuplicateKeyError
 from flask_wtf.csrf import CSRFProtect
 import uuid
 import email_validator
 from datetime import datetime
+from patientForm import AddPatientForm
 
 # import patient structure
 from patient import Patient
@@ -117,6 +118,9 @@ def load_user(userid):
     if user:
         return User.make_from_dict(user)
 
+
+#=====================================================
+
 # Flask-WTF form for user registration
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
@@ -140,6 +144,44 @@ class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Login')
+
+# problem form
+class problem_form(FlaskForm):
+    problem_id = StringField('Problem ID', validators=[DataRequired()])
+    title = StringField('Title', validators=[DataRequired()])
+    description = StringField('Description', validators=[DataRequired()])
+    active = BooleanField('Active')
+    start = DateField('Start', format='%Y-%m-%d')
+    end = DateField('End', format='%Y-%m-%d')
+
+# Add-patient form (dynamic), may change to other file and import it for code clarity
+class AddPatientFormDynamic(FlaskForm):
+    id = StringField('ID', validators=[DataRequired()])
+    name = StringField('Name', validators=[DataRequired()])
+    age = StringField('Age', validators=[DataRequired()])
+    problems = FieldList(FormField(problem_form), min_entries=1)
+
+    submit = SubmitField('Add Patient')
+
+    def validate_id(self, id):
+        patient = patients_collection.find_one({'id': id.data})
+        if patient:
+            raise ValidationError('Patient with this ID is already registered. Please use edit instead.')
+        
+# Add-patient form
+class AddPatientForm(FlaskForm):
+    id = StringField('ID', validators=[DataRequired()])
+    name = StringField('Name', validators=[DataRequired()])
+    age = StringField('Age', validators=[DataRequired()])
+
+    submit = SubmitField('Add Patient')
+
+    def validate_id(self, id):
+        patient = patients_collection.find_one({'id': id.data})
+        if patient:
+            raise ValidationError('Patient with this ID is already registered. Please use edit instead.')
+
+#=====================================================
 
 # home page
 @app.route('/', methods=['GET','POST'])
@@ -244,37 +286,72 @@ def patient(id):
     patient = patients_collection.find_one({'id': id})
     return render_template('patient.html', patient=patient)
 
-# Add patient
+# Add patient simple
 @app.route('/patient/add', methods=['GET', 'POST'])
 @login_required
 def add_patient():
-    if request.method == 'POST':
-        id = request.form['id']
-        name = request.form['name']
-        age = request.form['age']
-        problems = [] #request.form.getlist('problems')
-        OP_hx = request.form['OP_hx']
-        GI_status = request.form['GI_status']
-        lab = {} #request.form['lab']
-        notes = request.form['notes']
-        admission_hx = request.form['admission_hx']
+    form = AddPatientForm()
+    if form.validate_on_submit():
         patient_data = {
-            'id': id,
-            'name': name,
-            'age': age,
-            'problems': problems,
-            'OP_hx': OP_hx,
-            'GI_status': GI_status,
-            'lab': lab,
-            'notes': notes,
-            'admission_hx': admission_hx
+            'id': form.id.data,
+            'name': form.name.data,
+            'age': form.age.data,
+            'problems': [],
+            'OP_hx': '',
+            'GI_status': None,
+            'lab': {},
+            'notes': '',
+            'admission_hx': None
         }
         patients_collection.insert_one(patient_data)
-        logger('success','Add', patient_data['name'], 'None', 'Patient added successfully')
+        logger('success','Add new patient', current_user.username, patient_data['name'], 'Patient added successfully')
         flash('Patient added successfully', 'success')
 
-    return render_template('add-patient.html')
+    return render_template('add-patient.html', form=form)
 
+# Add patient with dynamic fields (problem)
+@app.route('/patient/add-dynamic', methods=['GET', 'POST'])
+@login_required
+def add_patient_dynamic():
+    form = AddPatientForm()
+    if form.validate_on_submit():
+        problems = []
+        for problem_form in form.problems:
+            problem_data = {
+                'problem_id': problem_form.problem_id.data,
+                'title': problem_form.title.data,
+                'description': problem_form.description.data,
+                'active': problem_form.active.data,
+                'start': problem_form.start.data,
+                'end': problem_form.end.data,
+                'link': ''
+            }
+            problems.append(Problem.make_from_dict(problem_data))
+        
+        patient_data = {
+            'id': form.id.data,
+            'name': form.name.data,
+            'age': form.age.data,
+            'problems': problems,
+            'OP_hx': '',
+            'GI_status': None,
+            'lab': {},
+            'notes': '',
+            'admission_hx': None
+        }
+        patients_collection.insert_one(patient_data)
+        logger('success','Add new patient', current_user.username, patient_data['name'], 'Patient added successfully')
+        flash('Patient added successfully', 'success')
+
+    return render_template('add-patient.html', form=form)
+
+# Add problem form dynamically
+@app.route('/add-field', methods=['POST'])
+@login_required
+def add_field():
+    # Add new field for AJAX response
+    new_field_html = render_template('field-problem.html', field_id=request.form['field_id'])
+    return jsonify({'new_field': new_field_html})
 
 # delete patient
 @app.route('/patient/<id>/delete')

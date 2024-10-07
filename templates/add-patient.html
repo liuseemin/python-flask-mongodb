@@ -2,4 +2,18 @@
 {% block title %}Add Patient{% endblock %}
 {% block content %}
 
+<div class="container">
+    <h1>Add Patient</h1>
+    <form method="POST" action="">
+        {{ form.hidden_tag() }}
+
+        {{ form.id.label }} {{ form.id(class="form-control") }}
+        {{ form.name.label }} {{ form.name(class="form-control") }}
+        {{ form.age.label }} {{ form.age(class="form-control") }}
+        
+        {{ form.submit(class="btn btn-primary") }}
+
+    </form>
+</div>
+
 {% endblock %}
