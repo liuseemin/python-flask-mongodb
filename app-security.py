@@ -12,6 +12,7 @@ from pymongo.errors import DuplicateKeyError
 from flask_wtf.csrf import CSRFProtect
 import uuid
 import email_validator
+from datetime import datetime
 
 # import patient structure
 from patient import Patient
@@ -19,12 +20,12 @@ from patient_data import Problem, admission, gi_status
 
 from config import Config
 
-
 app = Flask(__name__)
 app.config.from_object(Config)
 bcrypt = Bcrypt(app)
 mongo = PyMongo(app)
 
+# Safety setting
 # Create Talisman
 csp = {
     'default-src': "'self'",
@@ -40,20 +41,42 @@ csp = {
 }
 talisman = Talisman(app, content_security_policy=csp)
 
+# CSRF setting
 csrf = CSRFProtect(app)
-# csrf.init_app(app)
 
+# database and collections
 db = mongo.db
-
-# collection
 todos = db.todos
 users_collection = db.users
 patients_collection = db.patients
+problem_colection = db.problems
+log_collection = db.logs
+
+# Log method
+def logger(category, action, user, target, message):
+    log = {
+        'category': category,
+        'action': action,
+        'user': user,
+        'target': target,
+        'message': message,
+        'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    }
+    log_collection.insert_one(log)
 
 # Login Manager setting
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
+login_manager.login_message_category = "warning"
+
+
+# custom unauthorized handler
+@login_manager.unauthorized_handler
+def unauthorized():
+    logger('danger','Unauthorized', 'None', 'None', 'Unauthorized access')
+    flash('You must be logged in to access this page.', 'danger')
+    return redirect(url_for('login'))
 
 # define User class
 class User(UserMixin):
@@ -65,10 +88,12 @@ class User(UserMixin):
         self.email = email
         self.verified = verified
         self.hashed_password = hashed_password
-        self.role = role if not role is None else 'user'
+        self.role = role
     
     @classmethod
     def make_from_dict(cls, dict):
+        if dict.get('role') == None:
+            dict['role'] = 'user'
         return cls(dict['id'], dict['username'], dict['email'], dict['verified'], dict['hashed_password'], dict['role'])
 
     def dict(self):
@@ -96,7 +121,7 @@ def load_user(userid):
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
     email = StringField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('Password', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired(), Length(min=8, max=20)])
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Sign Up')
 
@@ -152,6 +177,7 @@ def register():
             # new_user = User.make_from_dict(user_data)
             users_collection.insert_one(user_data)
             flash('Account created successfully', 'success')
+            logger('primary','Account created', user_data['username'], 'None', 'Account created successfully')
             return redirect(url_for('login'))
         except DuplicateKeyError:
             flash('User with this email or username already exists.', 'danger')
@@ -173,6 +199,7 @@ def login():
             logedin_user = User.make_from_dict(user)
             login_user(logedin_user)
             flash('Login successful!', 'success')
+            logger('primary','Login', logedin_user.username, 'None', 'Login successful')
             return redirect(url_for('dashboard'))
         else:
             flash('Login unsuccessful. Please check email and password', 'danger')
@@ -185,6 +212,15 @@ def login():
 def dashboard():
     user = current_user.dict()
     return render_template('dashboard.html', username=user['username'], role=user['role'])
+
+# admin dashboard page
+@app.route('/admin')
+@login_required
+def admin():
+    if current_user.role != 'admin':
+        flash('You are not authorized to access this page', 'danger')
+        return redirect(url_for('dashboard'))
+    return render_template('admin.html')
 
 # Logout
 @app.route('/logout')
@@ -212,13 +248,46 @@ def patient(id):
 @app.route('/patient/add', methods=['GET', 'POST'])
 @login_required
 def add_patient():
-    pass
+    if request.method == 'POST':
+        id = request.form['id']
+        name = request.form['name']
+        age = request.form['age']
+        problems = [] #request.form.getlist('problems')
+        OP_hx = request.form['OP_hx']
+        GI_status = request.form['GI_status']
+        lab = {} #request.form['lab']
+        notes = request.form['notes']
+        admission_hx = request.form['admission_hx']
+        patient_data = {
+            'id': id,
+            'name': name,
+            'age': age,
+            'problems': problems,
+            'OP_hx': OP_hx,
+            'GI_status': GI_status,
+            'lab': lab,
+            'notes': notes,
+            'admission_hx': admission_hx
+        }
+        patients_collection.insert_one(patient_data)
+        logger('success','Add', patient_data['name'], 'None', 'Patient added successfully')
+        flash('Patient added successfully', 'success')
+
+    return render_template('add-patient.html')
+
 
 # delete patient
 @app.route('/patient/<id>/delete')
 @login_required
 def delete_patient(id):
     pass
+
+# log page
+@app.route('/log')
+@login_required
+def log():
+    logs = log_collection.find()
+    return render_template('log.html', logs=logs)
 
 # layout test page
 @app.route('/test')

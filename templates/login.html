@@ -11,7 +11,7 @@
                     <form method='POST' action="">
                         {{ form.hidden_tag() }}
                         <div class="mb-3">
-                            {{ form.email.label(class="form-label") }} {{ form.email(class="form-control", placeholder="example@google.com") }}
+                            {{ form.email.label(class="form-label") }} {{ form.email(class="form-control", placeholder="example@google.com", type="email") }}
                         </div>
                         <div class="mb-3">
                             {{ form.password.label(class="form-label") }} {{ form.password(class="form-control") }}

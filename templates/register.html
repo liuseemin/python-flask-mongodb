@@ -13,13 +13,27 @@
                         <div class="mb-3">
                             {{ form.username.label(class="form-label") }} {{ form.username(class="form-control") }}
                         </div>
+                        {% if form.username.errors %}
+                            {% for error in form.username.errors %}
+                                <div class="alert alert-danger" role="alert">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
                         <div class="mb-3">
-                            {{ form.email.label(class="form-label") }} {{ form.email(class="form-control", placeholder="example@google.com") }}
+                            {{ form.email.label(class="form-label") }} {{ form.email(class="form-control", placeholder="example@google.com", type="email") }}
                         </div>
+                        {% if form.email.errors %}
+                            {% for error in form.email.errors %}
+                                <div class="alert alert-danger" role="alert">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
                         <div class="mb-3">
                             {{ form.password.label(class="form-label") }} {{ form.password(class="form-control") }}
                             <div id="passwordHelpBlock" class="form-text">
-                                Your password must be 8-20 characters long, contain letters and numbers, and must not contain spaces, special characters, or emoji.
+                                Your password must be 8-20 characters long.
                             </div>
                         </div>
                         <div class="mb-3">

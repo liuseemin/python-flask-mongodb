@@ -1,9 +1,10 @@
 {% extends 'base.html' %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
+
 <div class="container ms-2">
 
-    <h1 class="my-4">Welcome, {{username}}, role: {{role}}</h1>
+    <h2 class="my-4">Welcome, {{username}}</h1>
     
     <a href="{{ url_for('logout') }}">Logout</a>
 

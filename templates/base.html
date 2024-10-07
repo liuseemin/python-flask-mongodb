@@ -1,3 +1,14 @@
+{%- set navigation_bar = {
+    'Home': url_for('index'),
+    'Dashboard': url_for('dashboard'),
+    'Logout': url_for('logout'),
+    'Login': url_for('login'),
+    'Register': url_for('register'),
+    'Patients': url_for('patients'),
+    'Add-patient': url_for('add_patient'),
+    'Log': url_for('log')
+} -%}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,19 +19,32 @@
     <link rel="stylesheet" href="{{url_for('static', filename='css/style.css')}}">
 </head>
 <body>
+
+    <nav class="navbar bg-dark navbar-expand-lg" data-bs-theme="dark">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="#">Tracker</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+              {% for name, url in navigation_bar.items() %}
+                <li class="nav-item">
+                    <a class="nav-link {% if request.path == url %}active{% endif %}" href="{{ url }}">{{ name }}</a>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </nav>
+
     <div class="flashes p-2">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    {% if category in ['primary', 'secondary', 'success', 'danger', 'dark'] %}
-                        <div class="card text-center bg-{{ category }} text-white p-1">
+                    <div class="alert text-center alert-{{ category }} p-1">
                             {{ message }}
-                        </div>
-                    {% else %}
-                        <div class="card text-center bg-{{ category }} text-dark p-1">
-                            {{ message }}
-                        </div>
-                    {% endif %}
+                    </div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
