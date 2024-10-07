@@ -2,7 +2,7 @@ from flask import Flask, render_template, url_for, request, redirect, flash, ses
 from flask_pymongo import PyMongo
 from flask_login import LoginManager, login_user, logout_user, login_required, UserMixin, current_user
 from flask_talisman import Talisman
-from pymongo.server_api import ServerApi
+# from pymongo.server_api import ServerApi
 from bson.objectid import ObjectId
 from flask_bcrypt import Bcrypt
 from flask_wtf import FlaskForm
@@ -44,6 +44,8 @@ db = mongo.db
 # collection
 todos = db.todos
 users_collection = db.users
+patients_collection = db.patients
+patients_collection = db.patients
 
 # Login Manager setting
 login_manager = LoginManager()
@@ -52,7 +54,7 @@ login_manager.login_view = "login"
 
 # define User class
 class User(UserMixin):
-    def __init__(self, id, username, email, verified, hashed_password) -> None:
+    def __init__(self, id, username, email, verified, hashed_password, role) -> None:
         super().__init__()
 
         self.id = id
@@ -60,10 +62,11 @@ class User(UserMixin):
         self.email = email
         self.verified = verified
         self.hashed_password = hashed_password
+        self.role = role
     
     @classmethod
     def make_from_dict(cls, dict):
-        return cls(dict['id'], dict['username'], dict['email'], dict['verified'], dict['hashed_password'])
+        return cls(dict['id'], dict['username'], dict['email'], dict['verified'], dict['hashed_password'], dict['role'])
 
     def dict(self):
         return {
@@ -71,7 +74,8 @@ class User(UserMixin):
             'username': self.username,
             'email': self.email,
             'verified': self.verified,
-            'hashed_password': self.hashed_password
+            'hashed_password': self.hashed_password,
+            'role': self.role
         }
 
     def get_id(self):
@@ -138,7 +142,8 @@ def register():
             'username': form.username.data,
             'email': form.email.data,
             'verified': True,
-            'hashed_password': hashed_password
+            'hashed_password': hashed_password,
+            'role': 'user'
         }
         try:
             # new_user = User.make_from_dict(user_data)
@@ -176,7 +181,7 @@ def login():
 @login_required
 def dashboard():
     user = current_user.dict()
-    return render_template('dashboard.html', username=user['username'])
+    return render_template('dashboard.html', username=user['username'], role=user['role'])
 
 # Logout
 @app.route('/logout')
@@ -185,6 +190,32 @@ def logout():
     logout_user()
     flash('You have been logged out.', 'info')
     return redirect(url_for('login'))
+
+# Patient list
+@app.route('/patients')
+@login_required
+def patients():
+    patients = patients_collection.find()
+    return render_template('patients.html', patients=patients)
+
+# Patient details
+@app.route('/patient/<id>')
+@login_required
+def patient(id):
+    patient = patients_collection.find_one({'id': id})
+    return render_template('patient.html', patient=patient)
+
+# Add patient
+@app.route('/patient/add', methods=['GET', 'POST'])
+@login_required
+def add_patient():
+    pass
+
+# delete patient
+@app.route('/patient/<id>/delete')
+@login_required
+def delete_patient(id):
+    pass
 
 # layout test page
 @app.route('/test')
