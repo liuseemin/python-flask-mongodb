@@ -13,7 +13,6 @@ from flask_wtf.csrf import CSRFProtect
 import uuid
 import email_validator
 from datetime import datetime
-from patientForm import AddPatientForm
 
 # import patient structure
 from patient import Patient
