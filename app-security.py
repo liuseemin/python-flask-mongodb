@@ -6,7 +6,7 @@ from flask_talisman import Talisman
 from bson.objectid import ObjectId
 from flask_bcrypt import Bcrypt
 from flask_wtf import FlaskForm
-from wtforms import BooleanField, DateField, FieldList, FormField, StringField, PasswordField, SubmitField
+from wtforms import BooleanField, DateField, FieldList, FormField, SelectField, StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Length, EqualTo, Email, ValidationError
 from pymongo.errors import DuplicateKeyError
 from flask_wtf.csrf import CSRFProtect
@@ -172,6 +172,7 @@ class AddPatientForm(FlaskForm):
     id = StringField('ID', validators=[DataRequired()])
     name = StringField('Name', validators=[DataRequired()])
     age = StringField('Age', validators=[DataRequired()])
+    sex = SelectField('Sex', choices=[('M', 'Male'), ('F', 'Female')])
 
     submit = SubmitField('Add Patient')
 
@@ -295,6 +296,7 @@ def add_patient():
             'id': form.id.data,
             'name': form.name.data,
             'age': form.age.data,
+            'sex': form.sex.data,
             'problems': [],
             'OP_hx': '',
             'GI_status': None,

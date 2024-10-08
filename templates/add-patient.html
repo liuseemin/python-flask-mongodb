@@ -7,9 +7,10 @@
     <form method="POST" action="">
         {{ form.hidden_tag() }}
 
-        {{ form.id.label }} {{ form.id(class="form-control") }}
-        {{ form.name.label }} {{ form.name(class="form-control") }}
-        {{ form.age.label }} {{ form.age(class="form-control") }}
+        {{ form.id.label(class="form-label") }} {{ form.id(class="form-control") }}
+        {{ form.name.label(class="form-label") }} {{ form.name(class="form-control") }}
+        {{ form.age.label(class="form-label") }} {{ form.age(class="form-control") }}
+        {{ form.sex.label(class="form-label") }} {{ form.sex(class="form-control") }}
         
         {{ form.submit(class="btn btn-primary") }}
 

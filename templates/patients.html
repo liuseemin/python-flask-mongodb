@@ -1,10 +1,15 @@
 {% extends 'base.html' %}
 {% block title %}Patients{% endblock %}
 {% block content %}
-    <section>
 
-    </section>
-    <section>
-        
-    </section>
+<div class="container">
+    {% for patient in patients %}
+        <ul class="list-group list-group-horizontal p-1">
+            <li class="list-group-item col-1">{{patient.id}}</li>
+            <li class="list-group-item col-1">{{patient.name}}</li>
+            <li class="list-group-item col-1">{{patient.age}}</li>
+            <li class="list-group-item col-1">{{patient.sex}}</li>
+        </ul>
+    {% endfor %}
+</div>
 {% endblock %}
