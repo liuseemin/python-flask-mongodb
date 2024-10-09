@@ -2,19 +2,78 @@
 {% block title %}Add Patient{% endblock %}
 {% block content %}
 
-<div class="container">
-    <h1>Add Patient</h1>
-    <form method="POST" action="">
-        {{ form.hidden_tag() }}
+<div class="container py-5 h-100">
+    <div class="row d-flex justify-content-center align-items-center h-100">
+        <div class="col col-xl-5 col-md-8 col-lg-6">
+            <div class="card rounded-4 bg-light">
+                <div class="row g-0">
+                    <div class="col">
+                        <div class="card-body p-5">
+                            
+                            <h1 class="my-4">Add patient</h1>
+                            <form method="POST" action="">
+                                {{ form.hidden_tag() }}
+                                <div class="row mb-3 align-items-center text-center">
+                                    <div class="col-2">
+                                        {{ form.id.label(class="col-form-label") }}
+                                    </div>
+                                    <div class="col">
+                                        {{ form.id(class="form-control") }}
+                                    </div>
+                                </div>
 
-        {{ form.id.label(class="form-label") }} {{ form.id(class="form-control") }}
-        {{ form.name.label(class="form-label") }} {{ form.name(class="form-control") }}
-        {{ form.age.label(class="form-label") }} {{ form.age(class="form-control") }}
-        {{ form.sex.label(class="form-label") }} {{ form.sex(class="form-control") }}
-        
-        {{ form.submit(class="btn btn-primary") }}
+                                <div class="row mb-3 align-items-center text-center">
+                                    <div class="col-2">
+                                        {{ form.name.label(class="form-label") }}
+                                    </div>
+                                    <div class="col">
+                                        {{ form.name(class="form-control") }}
+                                    </div>
+                                </div>
 
-    </form>
+                                <div class="row mb-3 align-items-center text-center">
+                                    <div class="col-2">
+                                        {{ form.age.label(class="form-label") }}
+                                    </div>
+                                    <div class="col">
+                                        {{ form.age(class="form-control") }}
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3  align-items-center text-center">
+                                    <div class="col-2">
+                                        {{ form.sex.label(class="form-label") }}
+                                    </div>
+                                    <div class="col">
+                                        <div class="btn-group mb-3 d-flex col" role="group" data-toggle="buttons">
+                                            {% for subfield in form.sex %}
+                                                {{ subfield(class="btn-check") }}
+                                                {{ subfield.label(class="btn btn-outline-success") }}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% if form.id.errors %}
+                                    {% for error in form.id.errors %}
+                                        <div class="alert alert-danger text-center" role="alert">
+                                            {{ error }}
+                                        </div>
+                                    {% endfor %}
+                                {% endif %}
+
+                                <div class="row g-3 align-items-center">
+                                    <div class="col-auto">
+                                        {{ form.submit(class="btn btn-primary") }}
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 {% endblock %}

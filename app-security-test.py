@@ -38,10 +38,16 @@ csp = {
         "'self'",
         'https://cdn.jsdelivr.net'
     ],
-    'img-src': "'self'"
+    'img-src': [
+        "'self'",
+        'https://mdbcdn.b-cdn.net'
+    ],
+    'font-src': [
+        "'self'",
+        'https://fonts.gstatic.com'
+    ]
 }
-nonce_list = ['default-src', 'script-src']
-talisman = Talisman(app, content_security_policy=csp, content_security_policy_nonce_in=nonce_list)
+talisman = Talisman(app, content_security_policy=csp)
 
 # CSRF setting
 csrf = CSRFProtect(app)

@@ -6,7 +6,7 @@ from flask_talisman import Talisman
 from bson.objectid import ObjectId
 from flask_bcrypt import Bcrypt
 from flask_wtf import FlaskForm
-from wtforms import BooleanField, DateField, FieldList, FormField, SelectField, StringField, PasswordField, SubmitField
+from wtforms import BooleanField, DateField, FieldList, FormField, RadioField, SelectField, StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Length, EqualTo, Email, ValidationError
 from pymongo.errors import DuplicateKeyError
 from flask_wtf.csrf import CSRFProtect
@@ -172,14 +172,14 @@ class AddPatientForm(FlaskForm):
     id = StringField('ID', validators=[DataRequired()])
     name = StringField('Name', validators=[DataRequired()])
     age = StringField('Age', validators=[DataRequired()])
-    sex = SelectField('Sex', choices=[('M', 'Male'), ('F', 'Female')])
+    sex = RadioField('Sex', choices=[('M', 'Male'), ('F', 'Female')])
 
     submit = SubmitField('Add Patient')
 
     def validate_id(self, id):
         patient = patients_collection.find_one({'id': id.data})
         if patient:
-            raise ValidationError('Patient with this ID is already registered. Please use edit instead.')
+            raise ValidationError('Patient with this ID is already registered!')
 
 #=====================================================
 
@@ -307,6 +307,7 @@ def add_patient():
         patients_collection.insert_one(patient_data)
         logger('success','Add new patient', current_user.username, patient_data['name'], 'Patient added successfully')
         flash('Patient added successfully', 'success')
+        return redirect(url_for('patients'))
 
     return render_template('add-patient.html', form=form)
 
