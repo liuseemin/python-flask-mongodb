@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, send_file
 import matplotlib.pyplot as plt
 import io
 import base64
+import numpy as np
 
 app = Flask(__name__)
 
@@ -25,11 +26,13 @@ def generate_schedule(schedule_text):
     # Create a simple bar plot for the schedule
     fig, ax = plt.subplots(figsize=(8, 6))
     y_pos = range(len(task_names))
-    ax.barh(y_pos, [end - start for start, end in zip(start_times, end_times)], left=start_times, color='skyblue')
+    p = ax.barh(y_pos, [end - start for start, end in zip(start_times, end_times)], left=start_times, color='skyblue')
     ax.set_yticks(y_pos)
     ax.set_yticklabels(task_names)
+    ax.set_xticks(np.arange(0, 24, 1))
     ax.set_xlabel('Time')
     ax.set_title('Schedule')
+    ax.bar_label(p, labels=task_names, label_type='center')
 
     # Save the plot to an in-memory buffer
     buf = io.BytesIO()
@@ -41,22 +44,12 @@ def generate_schedule(schedule_text):
     return buf
 
 @app.route('/', methods=['GET', 'POST'])
-def tpn(figdata=None):
+def tpn():
     if request.method == 'POST':
         schedule_text = request.form['schedule']
-        return redirect(url_for('schedule_image', schedule_text=schedule_text))
-    
-    figdata = base64.b64encode(generate_schedule('Task 1: 9-11\nTask 2: 12-14').getvalue()).decode('utf-8')
-    return render_template('TPN-view.html', figdata=figdata)
-
-@app.route('/schedule_image')
-def schedule_image():
-    schedule_text = request.args.get('schedule_text')
-    buf = generate_schedule(schedule_text)
-    figdata = base64.b64encode(buf.getvalue()).decode('utf-8')
-    return redirect(url_for('tpn'), figdata=figdata)
-    return redie
-    # return send_file(buf, mimetype='image/png')
+        buf = generate_schedule(schedule_text)
+        return send_file(buf, mimetype='image/png')
+    return render_template('TPN-view.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
