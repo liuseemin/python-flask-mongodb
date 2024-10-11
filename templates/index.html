@@ -1,10 +1,11 @@
 {% extends 'base.html' %}
 {% block title %}Home{% endblock %}
 {% block content %}
-    <div class="container ms-2">
+    <div class="container">
         <h1 class="my-4">Todo List</h1>
         <div class="content">
             <form method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <div class="form-floating mb-3">
                     <textarea class="form-control" id="content" name="content" placeholder="add todo..."></textarea>
                     <label for="content">Todo Content</label>
@@ -48,8 +49,11 @@
                     </div>
                     <div class="card-body">
                         <form method="POST" action="{{ url_for('delete', id=todo['_id']) }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                             {{todo['content']}} 
-                            <button type="submit" class="btn btn-danger btn-sm position-absolute end-0">Delete</button>
+                            <div class="float-end">
+                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                            </div>
                         </form>
                     </div>
                 </div>

@@ -1,12 +1,26 @@
-{%- set navigation_bar = {
+{%- set navigation_bar_unauth = {
     'Home': url_for('index'),
-    'Dashboard': url_for('dashboard'),
-    'Logout': url_for('logout'),
     'Login': url_for('login'),
-    'Register': url_for('register'),
-    'Patients': url_for('patients'),
-    'Add-patient': url_for('add_patient'),
-    'Log': url_for('log')
+    'Register': url_for('register')
+} -%}
+
+{%- set navigation_bar_auth = {
+  'Home': url_for('index'),
+  'Dashboard': url_for('dashboard'),
+  'Logout': url_for('logout'),
+  'Patients': url_for('patients'),
+  'Add-patient': url_for('add_patient')
+} -%}
+
+{%- set navigation_bar_admin = {
+  'Home': url_for('index'),
+  'Admin': url_for('admin'),
+  'Dashboard': url_for('dashboard'),
+  'Logout': url_for('logout'),
+  'Register': url_for('register'),
+  'Patients': url_for('patients'),
+  'Add-patient': url_for('add_patient'),
+  'Log': url_for('log')
 } -%}
 
 <!DOCTYPE html>
@@ -19,7 +33,6 @@
     <link rel="stylesheet" href="{{url_for('static', filename='css/style.css')}}">
 </head>
 <body>
-
     <nav class="navbar bg-dark navbar-expand-lg" data-bs-theme="dark">
         <div class="container-fluid">
           <a class="navbar-brand" href="#">Tracker</a>
@@ -28,6 +41,15 @@
           </button>
           <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
+              {% if current_user.is_authenticated %}
+                {% if current_user.role == 'admin' %}
+                  {% set navigation_bar = navigation_bar_admin %}
+                {% else %}
+                  {% set navigation_bar = navigation_bar_auth %}
+                {% endif %}
+              {% else %}
+                {% set navigation_bar = navigation_bar_unauth %}
+              {% endif %}
               {% for name, url in navigation_bar.items() %}
                 <li class="nav-item">
                     <a class="nav-link {% if request.path == url %}active{% endif %}" href="{{ url }}">{{ name }}</a>
@@ -36,7 +58,7 @@
             </ul>
           </div>
         </div>
-      </nav>
+    </nav>
 
     <div class="flashes p-2">
         {% with messages = get_flashed_messages(with_categories=true) %}

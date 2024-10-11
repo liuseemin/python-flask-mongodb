@@ -311,42 +311,6 @@ def add_patient():
 
     return render_template('add-patient.html', form=form)
 
-# Add patient with dynamic fields (problem)
-@app.route('/patient/add-dynamic', methods=['GET', 'POST'])
-@login_required
-def add_patient_dynamic():
-    form = AddPatientForm()
-    if form.validate_on_submit():
-        problems = []
-        for problem_form in form.problems:
-            problem_data = {
-                'problem_id': problem_form.problem_id.data,
-                'title': problem_form.title.data,
-                'description': problem_form.description.data,
-                'active': problem_form.active.data,
-                'start': problem_form.start.data,
-                'end': problem_form.end.data,
-                'link': ''
-            }
-            problems.append(Problem.make_from_dict(problem_data))
-        
-        patient_data = {
-            'id': form.id.data,
-            'name': form.name.data,
-            'age': form.age.data,
-            'problems': problems,
-            'OP_hx': '',
-            'GI_status': None,
-            'lab': {},
-            'notes': '',
-            'admission_hx': None
-        }
-        patients_collection.insert_one(patient_data)
-        logger('success','Add new patient', current_user.username, patient_data['name'], 'Patient added successfully')
-        flash('Patient added successfully', 'success')
-
-    return render_template('add-patient.html', form=form)
-
 # Add problem form dynamically
 @app.route('/add-field', methods=['POST'])
 @login_required
