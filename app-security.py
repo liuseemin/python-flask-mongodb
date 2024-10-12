@@ -37,7 +37,11 @@ csp = {
         "'self'",
         'https://cdn.jsdelivr.net'
     ],
-    'img-src': "'self'"
+    'img-src': [
+        "'self'",
+        'https:',
+        'data:'
+    ]
 }
 talisman = Talisman(app, content_security_policy=csp)
 
@@ -255,16 +259,6 @@ def dashboard():
     user = current_user.dict()
     return render_template('dashboard.html', username=user['username'], role=user['role'])
 
-# admin dashboard page
-@app.route('/admin')
-@login_required
-def admin():
-    if current_user.role != 'admin':
-        flash('You are not authorized to access this page', 'danger')
-        return redirect(url_for('dashboard'))
-    users = users_collection.find()
-    return render_template('admin.html', users=users) 
-
 # Logout
 @app.route('/logout')
 @login_required
@@ -332,6 +326,35 @@ def delete_patient(id):
 def log():
     logs = log_collection.find()
     return render_template('log.html', logs=logs)
+
+# admin dashboard page
+@app.route('/admin')
+@login_required
+def admin():
+    if current_user.role != 'admin':
+        flash('You are not authorized to access this page', 'danger')
+        return redirect(url_for('dashboard'))
+    users = users_collection.find()
+    return render_template('admin.html', users=users) 
+
+# Handle change role
+@app.route('/change-role', methods=['POST'])
+@login_required
+def change_role():
+    if current_user.role != 'admin':
+        flash('You are not authorized to access this page', 'danger')
+        return redirect(url_for('dashboard'))
+    role = request.form['role']
+    id = request.form['user_id']
+    admin_count = users_collection.count_documents({'role': 'admin'})
+    if (id == current_user.id and role != 'admin' and admin_count == 1):
+        flash('You can not remove the last admin', 'danger')
+        return redirect(url_for('admin'))
+
+    users_collection.update_one({'id': id}, {'$set': {'role': role}})
+    flash('Role changed successfully', 'success')
+    logger('success', 'Change role', current_user.username, users_collection.find_one({'id': id})['username'], 'Role changed successfully')
+    return redirect(url_for('admin'))
 
 # layout test page
 @app.route('/test')

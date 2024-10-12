@@ -3,47 +3,56 @@
 {% block content %}
 <div class="container">
     <div class="row d-flex align-items-center h-100">
-        <div class="col col-xl-5 col-md-8 col-lg-6">
+        <div class="col">
             <h1>Admin</h1>
             <h2>Users</h2>
             <ul class="list-group">
                 {% for user in users %}
                     <li class="list-group-item d-flex">
                         <a>
-                            {{ user.username }}
+                            <span class="badge text-bg-secondary me-2">id: {{ user.id }}</span>
+                            {{ user.username }} ( {{ user.email }} )
                             <span class="badge text-bg-{{ 'danger' if user.role == 'admin' else 'primary' }}"> {{ user.role }} </span>
                         </a>
                         <div class="ms-auto">
                             <a type="button" class="btn btn-{{ 'secondary disabled btn-sm' if user.verified else 'warning'}}">
                                 {{ 'Verified' if user.verified else 'Verify' }}
                             </a>
-                            <a type="button" href="#" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                            <a type="button" href="#" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#ChangeRole_{{ user.id }}">
                                 Edit role
                             </a>
                             <a type="button" class="btn btn-danger" href="{{ url_for('register')}}"> Delete </a>
                         </div>
                     </li>
+                    <!-- Modal -->
+                    <div class="modal fade" id="ChangeRole_{{ user.id }}" tabindex="-1" aria-labelledby="ModalLabel_{{ user.id }}" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="ModalLabel_{{ user.id }}">Change role of {{ user.username }}</h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <form method="POST" action="{{ url_for('change_role')}}">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                    <input type="hidden" name="user_id" value="{{ user.id }}" />
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <label for="role-{{ user.id }}" class="form-label">
+                                                Current Role: <span class="badge text-bg-{{ 'danger' if user.role == 'admin' else 'primary' }}"> {{ user.role }} </span>
+                                            </label>
+                                            <input type="text" class="form-control" id="role-{{ user.id }}" name="role" placeholder="New Role"/>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        <input type="submit" class="btn btn-primary" formaction="{{ url_for('change_role')}}" name="submit" value="Save changes"/>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 {% endfor %}
             </ul>
     </div>
 </div>
-  
-  <!-- Modal -->
-  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          ...
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary">Save changes</button>
-        </div>
-      </div>
-    </div>
-  </div>
 {% endblock %}
