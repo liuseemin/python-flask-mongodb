@@ -15,16 +15,16 @@
                             <span class="badge text-bg-{{ 'danger' if user.role == 'admin' else 'primary' }}"> {{ user.role }} </span>
                         </a>
                         <div class="ms-auto">
-                            <a type="button" class="btn btn-{{ 'secondary disabled btn-sm' if user.verified else 'warning'}}">
+                            <a type="button" href="{{ url_for('verify_user', id=user.id)}}" class="btn btn-{{ 'secondary disabled btn-sm' if user.verified else 'warning'}}">
                                 {{ 'Verified' if user.verified else 'Verify' }}
                             </a>
                             <a type="button" href="#" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#ChangeRole_{{ user.id }}">
                                 Edit role
                             </a>
-                            <a type="button" class="btn btn-danger" href="{{ url_for('register')}}"> Delete </a>
+                            <a type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#Delete_{{ user.id }}"> Delete </a>
                         </div>
                     </li>
-                    <!-- Modal -->
+                    <!-- Modal for change role -->
                     <div class="modal fade" id="ChangeRole_{{ user.id }}" tabindex="-1" aria-labelledby="ModalLabel_{{ user.id }}" aria-hidden="true">
                         <div class="modal-dialog">
                             <div class="modal-content">
@@ -46,6 +46,28 @@
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                                         <input type="submit" class="btn btn-primary" formaction="{{ url_for('change_role')}}" name="submit" value="Save changes"/>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Modal for delete -->
+                    <div class="modal fade" id="Delete_{{ user.id }}" tabindex="-1" aria-labelledby="DeletemodalLabel_{{ user.id }}" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="DeletemodalLabel_{{ user.id }}">Delete {{ user.username }}</h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <form method="POST" action="{{ url_for('delete_user')}}">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                    <input type="hidden" name="user_id" value="{{ user.id }}" />
+                                    <div class="modal-body">
+                                        <p>Are you sure you want to delete {{ user.username }}?</p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                                        <input type="submit" class="btn btn-danger" name="submit" value="Delete"/>
                                     </div>
                                 </form>
                             </div>

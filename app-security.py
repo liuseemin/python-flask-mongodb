@@ -223,7 +223,7 @@ def register():
             # new_user = User.make_from_dict(user_data)
             users_collection.insert_one(user_data)
             flash('Account created successfully', 'success')
-            logger('primary','Account created', user_data['username'], 'None', 'Account created successfully')
+            logger('primary','Account created', user_data['username'], user_data['username'], 'Account created successfully')
             return redirect(url_for('login'))
         except DuplicateKeyError:
             flash('User with this email or username already exists.', 'danger')
@@ -242,13 +242,16 @@ def login():
     if form.validate_on_submit():
         user = users_collection.find_one({'email': form.email.data}, {'_id': False})
         if user and bcrypt.check_password_hash(user['hashed_password'], form.password.data):
+            if user['verified'] == False:
+                flash('Unverified account. Please contact admin to verify your account.', 'danger')
+                return render_template('login.html', form=form)
             logedin_user = User.make_from_dict(user)
             login_user(logedin_user)
             flash('Login successful!', 'success')
             logger('primary','Login', logedin_user.username, 'None', 'Login successful')
             return redirect(url_for('dashboard'))
         else:
-            flash('Login unsuccessful. Please check email and password', 'danger')
+            flash('Login unsuccessful. Please check email and password.', 'danger')
 
     return render_template('login.html', form=form)
 
@@ -353,7 +356,34 @@ def change_role():
 
     users_collection.update_one({'id': id}, {'$set': {'role': role}})
     flash('Role changed successfully', 'success')
-    logger('success', 'Change role', current_user.username, users_collection.find_one({'id': id})['username'], 'Role changed successfully')
+    logger('success', 'role changed', current_user.username, users_collection.find_one({'id': id})['username'], 'Role changed successfully')
+    return redirect(url_for('admin'))
+
+# delete user
+@app.route('/delete_user', methods=['POST'])
+@login_required
+def delete_user():
+    if current_user.role != 'admin':
+        flash('You are not authorized to access this page', 'danger')
+        return redirect(url_for('dashboard'))
+    id = request.form['user_id']
+    username = users_collection.find_one({'id': id})['username']
+    users_collection.delete_one({'id': id})
+    flash('User deleted successfully', 'success')
+    logger('success', 'user deleted', current_user.username, username, 'User deleted successfully')
+    return redirect(url_for('admin'))
+
+# Verify user
+@app.route('/verify_user')
+@login_required
+def verify_user():
+    if current_user.role != 'admin':
+        flash('You are not authorized to access this page', 'danger')
+        return redirect(url_for('dashboard'))
+    id = request.args.get('id')
+    users_collection.update_one({'id': id}, {'$set': {'verified': True}})
+    flash('User verified successfully', 'success')
+    logger('success', 'user verified', current_user.username, users_collection.find_one({'id': id})['username'], 'User verified successfully')
     return redirect(url_for('admin'))
 
 # layout test page
