@@ -211,7 +211,7 @@ def register():
             'id': uuid.uuid4().hex, # uuid4().hex is just same without dashes
             'username': form.username.data,
             'email': form.email.data,
-            'verified': True,
+            'verified': False,
             'hashed_password': hashed_password,
             'role': 'user'
         }
@@ -262,7 +262,8 @@ def admin():
     if current_user.role != 'admin':
         flash('You are not authorized to access this page', 'danger')
         return redirect(url_for('dashboard'))
-    return render_template('admin.html')
+    users = users_collection.find()
+    return render_template('admin.html', users=users) 
 
 # Logout
 @app.route('/logout')
