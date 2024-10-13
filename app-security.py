@@ -330,6 +330,13 @@ def log():
     logs = log_collection.find()
     return render_template('log.html', logs=logs)
 
+# clear logs
+@app.route('/clear_logs')
+@login_required
+def clear_logs():
+    log_collection.delete_many({})
+    return redirect(url_for('log'))
+
 # admin dashboard page
 @app.route('/admin')
 @login_required
@@ -351,7 +358,7 @@ def change_role():
     id = request.form['user_id']
     admin_count = users_collection.count_documents({'role': 'admin'})
     if (id == current_user.id and role != 'admin' and admin_count == 1):
-        flash('You can not remove the last admin', 'danger')
+        flash('You cannot remove the last admin', 'danger')
         return redirect(url_for('admin'))
 
     users_collection.update_one({'id': id}, {'$set': {'role': role}})
@@ -368,9 +375,13 @@ def delete_user():
         return redirect(url_for('dashboard'))
     id = request.form['user_id']
     username = users_collection.find_one({'id': id})['username']
+    admin_count = users_collection.count_documents({'role': 'admin'})
+    if (id == current_user.id and admin_count == 1):
+        flash('You cannot delete the last admin', 'danger')
+        return redirect(url_for('admin'))
     users_collection.delete_one({'id': id})
     flash('User deleted successfully', 'success')
-    logger('success', 'user deleted', current_user.username, username, 'User deleted successfully')
+    logger('danger', 'user deleted', current_user.username, username, 'User deleted successfully')
     return redirect(url_for('admin'))
 
 # Verify user
@@ -381,9 +392,15 @@ def verify_user():
         flash('You are not authorized to access this page', 'danger')
         return redirect(url_for('dashboard'))
     id = request.args.get('id')
-    users_collection.update_one({'id': id}, {'$set': {'verified': True}})
-    flash('User verified successfully', 'success')
-    logger('success', 'user verified', current_user.username, users_collection.find_one({'id': id})['username'], 'User verified successfully')
+    user = users_collection.find_one({'id': id})
+    action = 'verified'
+    valueTo = True
+    if user['verified'] and user['role'] != 'admin':
+        action = 'unverified'
+        valueTo = False
+    users_collection.update_one({'id': id}, {'$set': {'verified': valueTo}})
+    flash('User ' + action + ' successfully', 'success')
+    logger('success', 'user ' + action, current_user.username, users_collection.find_one({'id': id})['username'], 'User ' + action + ' successfully')
     return redirect(url_for('admin'))
 
 # layout test page

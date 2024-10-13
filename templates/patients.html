@@ -4,12 +4,23 @@
 
 <div class="container">
     {% for patient in patients %}
-        <ul class="list-group list-group-horizontal p-1">
-            <li class="list-group-item col-1">{{patient.id}}</li>
-            <li class="list-group-item col-1">{{patient.name}}</li>
-            <li class="list-group-item col-1">{{patient.age}}</li>
-            <li class="list-group-item col-1">{{patient.sex}}</li>
-        </ul>
+        <div class="card mb-3 w-50">
+            <!-- <div class="row g-0">
+                <div class="col-2">
+                    <img src="{{url_for('static', filename='img/patient.png')}}" class="img-fluid rounded-start" alt="patient pic">
+                </div> -->
+                <div class="col">
+                    <div class="card-header align-items-center">
+                        <h5 class="m-0">{{patient.name}} [ID: {{patient.id}}]</h5>
+                    </div>
+                    <div class="card-body d-flex align-items-center">
+                        Age: {{patient.age}} y/o, {{patient.sex}}
+                        <a type="button" class="btn btn-primary ms-auto" href="{{ url_for('patient', id=patient.id)}}">View</a>
+                        <!-- <p class="card-text"><small class="text-body-secondary">Last updated 3 mins ago</small></p> -->
+                    </div>
+                </div>
+            <!-- </div> -->
+        </div>
     {% endfor %}
 </div>
 {% endblock %}

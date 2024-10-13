@@ -8,14 +8,15 @@
             <h2>User list</h2>
             <ul class="list-group">
                 {% for user in users %}
-                    <li class="list-group-item d-flex">
+                    <li class="list-group-item d-flex align-items-center">
                         <a>
                             <span class="badge text-bg-secondary me-2">id: {{ user.id }}</span>
                             {{ user.username }} ( {{ user.email }} )
                             <span class="badge text-bg-{{ 'danger' if user.role == 'admin' else 'primary' }}"> {{ user.role }} </span>
                         </a>
                         <div class="ms-auto">
-                            <a type="button" href="{{ url_for('verify_user', id=user.id)}}" class="btn btn-{{ 'secondary disabled btn-sm' if user.verified else 'warning'}}">
+                            <a type="button" href="{{ url_for('verify_user', id=user.id)}}"
+                                class="btn btn-{{ 'secondary btn-sm' if user.verified else 'warning' }} {{ 'disabled' if user.role == 'admin' }}">
                                 {{ 'Verified' if user.verified else 'Verify' }}
                             </a>
                             <a type="button" href="#" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#ChangeRole_{{ user.id }}">
