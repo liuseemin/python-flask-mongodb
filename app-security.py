@@ -223,7 +223,7 @@ def register():
             # new_user = User.make_from_dict(user_data)
             users_collection.insert_one(user_data)
             flash('Account created successfully', 'success')
-            logger('primary','Account created', user_data['username'], user_data['username'], 'Account created successfully')
+            logger('success','Account created', user_data['username'], user_data['username'], 'Account created successfully')
             return redirect(url_for('login'))
         except DuplicateKeyError:
             flash('User with this email or username already exists.', 'danger')
